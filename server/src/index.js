@@ -12,16 +12,23 @@ import { setupWsServer } from './wsServer.js'
 const app = express()
 const httpServer = createServer(app)
 
-// Socket.io (used for presence notifications in Phase 5)
-const io = new Server(httpServer, {
-  cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
-    methods: ['GET', 'POST'],
-    credentials: true,
-  },
-})
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://collab-docs-navy.vercel.app',
+  /\.vercel\.app$/,
+]
 
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }))
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true)
+    const allowed = allowedOrigins.some(o =>
+      typeof o === 'string' ? o === origin : o.test(origin)
+    )
+    callback(null, allowed)
+  },
+  credentials: true,
+}))
+
 app.use(express.json())
 
 app.get('/health', (req, res) => {
@@ -31,7 +38,6 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes)
 app.use('/api/docs', docRoutes)
 
-// Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack)
   res.status(err.status || 500).json({ message: err.message || 'Internal server error' })
@@ -39,13 +45,11 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 4000
 
+setupWsServer(httpServer)
+
 const start = async () => {
   await connectDB()
   await getRedis().connect().catch(() => {})
-
-  // Attach Yjs WebSocket server to the same HTTP server
-  setupWsServer(httpServer)
-
   httpServer.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`)
     console.log(`Yjs WS ready on ws://localhost:${PORT}/yjs`)
@@ -53,5 +57,3 @@ const start = async () => {
 }
 
 start()
-
-export { io }
