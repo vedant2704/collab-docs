@@ -23,6 +23,10 @@ const documentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       default: [{ type: 'paragraph', children: [{ text: '' }] }],
     },
+    yjsState: {
+      type: Buffer,
+      default: null,
+    },
     version: {
       type: Number,
       default: 0,
@@ -41,9 +45,20 @@ documentSchema.index({ 'collaborators.user': 1, isDeleted: 1 })
 
 documentSchema.methods.getUserRole = function (userId) {
   const uid = userId.toString()
-  const ownerStr = this.owner._id ? this.owner._id.toString() : this.owner.toString()
-  if (ownerStr === uid) return 'admin'
-  const collab = this.collaborators.find((c) => c.user.toString() === uid)
+
+  const ownerId = this.owner?._id
+    ? this.owner._id.toString()
+    : this.owner?.toString()
+
+  if (ownerId === uid) return 'admin'
+
+  const collab = this.collaborators.find((c) => {
+    const collabUserId = c.user?._id
+      ? c.user._id.toString()
+      : c.user?.toString()
+    return collabUserId === uid
+  })
+
   return collab?.role || null
 }
 
