@@ -52,8 +52,8 @@ collab-tool/
 
 ## Build Phases
 - [x] Phase 1 — Project setup & scaffolding
-- [ ] Phase 2 — Auth (register, login, JWT)
-- [ ] Phase 3 — Document CRUD + Slate.js editor
-- [ ] Phase 4 — Real-time sync (Yjs + Socket.io)
-- [ ] Phase 5 — Cursor presence, sharing, version history
-- [ ] Phase 6 — Deploy & polish
+- [x] Phase 2 — Auth (register, login, JWT)
+- [x] Phase 3 — Document CRUD + Slate.js editor
+- [x] Phase 4 — Real-time sync (Yjs + Socket.io)
+- [x] Phase 5 — Cursor presence, sharing, version history
+- [x] Phase 6 — Deploy & polish
